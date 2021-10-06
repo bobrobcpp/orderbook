@@ -1,4 +1,5 @@
 export interface Data {
-  data: any;
+  asks: any;
+  bids: any;
   setData: any;
 }

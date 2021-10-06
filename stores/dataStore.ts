@@ -1,15 +1,23 @@
-import { makeAutoObservable, makeObservable, autorun, runInAction, reaction, observable, action } from "mobx"
+import { makeAutoObservable } from "mobx"
 import { Data } from './dataStore.d'
 
 export class DataStore implements Data {
 
-  public data = null
+  public asks = []
+  public bids = []
 
   constructor() {
     makeAutoObservable(this)
-}
+  }
   public async setData(data: any): Promise<void> {
-    this.data = data
+    const initialAsks = data?.asks
+    const initialBids = data?.bids
+
+    initialAsks.map((ask: Number[]) => ask.push(ask[1]))
+    initialBids.map((bid: Number[]) => bid.push(bid[1]))
+
+    this.asks = initialAsks
+    this.bids = initialBids
   }
 }
 
