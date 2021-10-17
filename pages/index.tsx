@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { observer } from 'mobx-react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -8,18 +8,28 @@ import dataStore from '../stores/dataStore'
 
 const Home: NextPage = observer(() => {
   const socket = useRef<WebSocket>()
-
-  const connect = () => {
+  const [product, setProduct] = useState('xbt');
+  const connect = (market: any = 'xbt') => {
+  const xbt = "PI_XBTUSD"
+  const eth = "PI_ETHUSD"
+  let feed: string
+  if (market === 'xbt'){
+    feed = xbt
+  } else {
+    feed = eth
+  }
     if (typeof window !== 'undefined') {
       socket.current = new WebSocket("wss://www.cryptofacilities.com/ws/v1")
       socket.current.onopen = function(e) {
-        socket.current?.send('{"event":"subscribe","feed":"book_ui_1","product_ids":["PI_XBTUSD"]}');
+        socket.current?.send(`{"event":"subscribe","feed":"book_ui_1","product_ids":["${feed}"]}`);
       };
       socket.current.onmessage = function(event) {
         if(event.data) {
           const data = JSON.parse(event.data)
+          if (data.feed === 'book_ui_1') {
+            dataStore.amendData(data)
+          }
           if (data.feed === 'book_ui_1_snapshot') {
-            console.log('yest', data)
             dataStore.setData(data)
           }
         }
@@ -44,6 +54,24 @@ const Home: NextPage = observer(() => {
       if(socket.current.readyState === 1) {
         console.log('socket is OPEN!')
         socket.current.close()
+      }
+      else {
+        connect()
+      }
+    }
+  }
+
+  const toggleProduct = () => {
+    if (typeof window !== 'undefined' && socket.current) {
+      if(socket.current.readyState === 1) {
+        console.log('socket is OPEN!')
+        socket.current.close()
+        if(product === 'xbt') {
+          setProduct('eth')
+        } else {
+          setProduct('xbt')
+        }
+        connect(product)
       }
       else {
         connect()
@@ -81,31 +109,49 @@ const Home: NextPage = observer(() => {
           <button onClick={toggleFeed}>
           Refresh the feed
           </button>
+          Spread: {dataStore.spread}
         </div>
         {dataStore?.asks[0] && dataStore?.bids[0] &&  (
+        <div className={styles.tableWrapper}>
         <table>
-        <tbody>
-          <tr>
-            <th>Total</th>
-            <th>Size</th>
-            <th>Price</th>
-            <th>Price</th>
-            <th>Size</th>
-            <th>Total</th>
-          </tr>
-          <tr>
-            <th>{dataStore.asks[0][2]}</th>
-            <th>{dataStore.asks[0][1]}</th>
-            <th>{dataStore.asks[0][0]}</th>
-            <th>{dataStore.bids[0][0]}</th>
-            <th>{dataStore.bids[0][1]}</th>
-            <th>{dataStore.bids[0][2]}</th>
-          </tr>
-        </tbody>
-      </table>
+          <tbody>
+            <tr>
+              <th>Total</th>
+              <th>Size</th>
+              <th>Price</th>
+            </tr>
+            {dataStore.bids.map((bid, index)=>
+              <tr key={index}>
+                <td>{bid[2]}</td>
+                <td>{bid[1]}</td>
+                <td className={styles.bidPrice}>{bid[0]}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <table>
+          <tbody>
+            <tr>
+              <th>Price</th>
+              <th>Size</th>
+              <th>Total</th>
+            </tr>
+            {dataStore.asks.map((ask, index)=>
+              <tr key={index}>
+                <td className={styles.askPrice}>{ask[0]}</td>
+                <td>{ask[1]}</td>
+                <td>{ask[2]}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        </div>
         )}
         <div>
         </div>
+        <button onClick={toggleProduct}>
+          Toggle Feed
+          </button>
       </main>
 
       <footer className={styles.footer}>
