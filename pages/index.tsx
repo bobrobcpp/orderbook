@@ -20,7 +20,7 @@ const Home: NextPage = observer(() => {
   }
     if (typeof window !== 'undefined') {
       socket.current = new WebSocket("wss://www.cryptofacilities.com/ws/v1")
-      socket.current.onopen = function(e) {
+      socket.current.onopen = function() {
         socket.current?.send(`{"event":"subscribe","feed":"book_ui_1","product_ids":["${feed}"]}`);
       };
       socket.current.onmessage = function(event) {
@@ -34,16 +34,6 @@ const Home: NextPage = observer(() => {
           }
         }
       };
-      socket.current.onclose = function(event) {
-        if (event.wasClean) {
-          console.log('cleanClose')
-        } else {
-          console.log('notcleanClose')
-          // e.g. server process killed or network down
-          // event.code is usually 1006 in this case
-
-        }
-      };
       socket.current.onerror = function(error) {
         console.log('error')
       };
@@ -52,7 +42,6 @@ const Home: NextPage = observer(() => {
   const toggleFeed = () => {
     if (typeof window !== 'undefined' && socket.current) {
       if(socket.current.readyState === 1) {
-        console.log('socket is OPEN!')
         socket.current.close()
       }
       else {
@@ -64,7 +53,6 @@ const Home: NextPage = observer(() => {
   const toggleProduct = () => {
     if (typeof window !== 'undefined' && socket.current) {
       if(socket.current.readyState === 1) {
-        console.log('socket is OPEN!')
         socket.current.close()
         if(product === 'xbt') {
           setProduct('eth')
@@ -81,10 +69,8 @@ const Home: NextPage = observer(() => {
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === "hidden" && socket.current) {
-      console.log('stop')
       socket.current.close()
     } else  {
-      console.log('Allow start')
     }
   }
 
