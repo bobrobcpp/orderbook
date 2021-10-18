@@ -50,7 +50,7 @@
 .title {
   margin: 0;
   line-height: 1.15;
-  font-size: 4rem;
+  font-size: 2rem;
 }
 
 .title,
@@ -126,6 +126,7 @@
 .tableWrapper {
   display: flex;
   overflow: scroll;
+  margin: 20px;
 }
 
 .bidPrice {

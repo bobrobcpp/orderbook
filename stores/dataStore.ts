@@ -1,15 +1,20 @@
-import { makeAutoObservable } from "mobx"
+import { IObservableArray, makeAutoObservable, observable } from "mobx"
 import { Data } from './dataStore.d'
 
 export class DataStore implements Data {
-  public bids = []
-  public asks = []
+  public bids: IObservableArray = observable<string>([])
+  public asks: IObservableArray = observable<string>([])
   public spread = 0
-
+  public feed = ''
 
   constructor() {
     makeAutoObservable(this)
   }
+
+  public setFeed(feed: string): void {
+    this.feed = feed
+  }
+
   public async setData(data: any): Promise<void> {
     const initialBids = data?.bids
     const initialAsks = data?.asks
@@ -28,8 +33,8 @@ export class DataStore implements Data {
     this.bids = initialBids
     this.asks = initialAsks
   }
-  public async amendData(data: any): Promise<void> {
-    data.bids?.map((bid: any) => {
+  public async amendData(data: Data): Promise<void> {
+    data.bids?.map((bid: IObservableArray) => {
       let foundBid = this.bids.findIndex((element) => parseFloat(element[0]) === parseFloat(bid[0]))
         if (foundBid !== -1){
           if(!bid[1]){
@@ -54,7 +59,7 @@ export class DataStore implements Data {
           }, 0)
         }
     })
-    data.asks?.map((ask: any) => {
+    data.asks?.map((ask: IObservableArray) => {
       let foundAsk = this.asks.findIndex((element) => parseFloat(element[0]) === parseFloat(ask[0]))
         if (foundAsk !== -1){
           if(!ask[1]){

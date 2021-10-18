@@ -1,5 +1,6 @@
+import { observable } from "mobx"
 export interface Data {
-  asks: any;
-  bids: any;
-  setData: any;
+  bids?: IObservableArray<any>;
+  asks?: IObservableArray<any>;
+  feed?: string;
 }

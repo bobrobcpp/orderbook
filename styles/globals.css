@@ -14,3 +14,12 @@ a {
 * {
   box-sizing: border-box;
 }
+
+td {
+  text-align: center
+}
+
+button {
+  background-color: #5741D9;
+  color: white;
+}
